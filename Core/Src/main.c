@@ -30,6 +30,8 @@
 #include "pwm_module.h"
 #include "encoder_driver.h"
 #include "encoder_module.h"
+#include "button_driver.h"
+#include "button_module.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -101,8 +103,8 @@ int main(void)
   PWM_Init();
   Encoder_Init();
   Scheduler_Init();
-//  Scheduler_AddTask(PWM_Task, 1000);
-  Scheduler_AddTask(Debug_Task, 1000);
+  Button_Init();
+  Scheduler_AddTask(Button_Task, 50);
   Scheduler_AddTask(Encoder_Task, 10);
   /* USER CODE END 2 */
 

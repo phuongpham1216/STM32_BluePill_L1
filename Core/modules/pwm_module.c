@@ -9,7 +9,6 @@
 #include "pwm_module.h"
 #include "pwm_driver.h"
 
-static uint32_t freq = 20000;
 static uint16_t duty = 50;
 
 void PWM_Task(void)

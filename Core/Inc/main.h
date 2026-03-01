@@ -61,7 +61,6 @@ void Error_Handler(void);
 #define LED_GPIO_Port GPIOC
 #define EcSW_Pin GPIO_PIN_2
 #define EcSW_GPIO_Port GPIOA
-#define EcSW_EXTI_IRQn EXTI2_IRQn
 
 /* USER CODE BEGIN Private defines */
 

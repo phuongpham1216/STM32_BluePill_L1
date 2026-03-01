@@ -1,0 +1,7 @@
+Debug/
+Release/
+.settings/
+*.launch
+*.log
+Thumbs.db
+.DS_Store

@@ -43,3 +43,15 @@ void PWM_SetFrequency(uint32_t freq)
 
     pwm_freq = freq;
 }
+
+void PWM_Start(void)
+{
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+}
+
+void PWM_Stop(void)
+{
+    HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+    HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
+}

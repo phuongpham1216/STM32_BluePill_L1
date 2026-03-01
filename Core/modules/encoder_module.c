@@ -12,62 +12,32 @@
 #include "pwm_driver.h"
 #include "app.h"
 
+static int16_t last_position = 0;
 extern TIM_HandleTypeDef htim1;
 
 void Encoder_Task(void)
 {
-    int16_t delta = Encoder_GetDelta();
+	int16_t now = Encoder_GetPosition();
+	int16_t delta = now - last_position;
+	last_position = now;
 
-    if(delta == 0) return;
+	if(delta == 0) return;
 
-    switch(app.mode)
-    {
-        case MODE_FREQUENCY:
-            {
-                app.freq += delta * 100;
-                if(app.freq < 1000)  app.freq = 1000;
-                if(app.freq > 50000) app.freq = 50000;
+	switch(app.mode)
+	{
+	    case MODE_FREQUENCY:
+	        App_AdjustFrequency(delta);
+	        break;
 
-                PWM_SetFrequency(app.freq);
-                printf("Mode:FREQ -> %lu Hz\r\n", app.freq);
-            }
-            break;
+	    case MODE_DUTY:
+	        App_AdjustDuty(delta);
+	        break;
 
-        case MODE_DUTY:
-            {
-                int32_t d = app.duty + delta;
-                if(d <   5) d = 5;
-                if(d >  95) d = 95;
-                app.duty = d;
-
-                PWM_SetDuty(app.duty);
-                printf("Mode:DUTY -> %u %%\r\n", app.duty);
-            }
-            break;
-
-        case MODE_RUN:
-            {
-                if(delta > 0)
-                {
-                    if(!app.pwm_running)
-                    {
-                        PWM_Init();
-                        app.pwm_running = 1;
-                        printf("PWM START\r\n");
-                    }
-                }
-                else
-                {
-                    if(app.pwm_running)
-                    {
-                        // stop PWM
-                        HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-                        HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-                        app.pwm_running = 0;
-                        printf("PWM STOP\r\n");
-                    }
-                }
-            }
-            break;
-    }
+	    case MODE_RUN:
+	        if(delta > 0)
+	            App_SetRun(1);
+	        else
+	            App_SetRun(0);
+	        break;
+	}
 }

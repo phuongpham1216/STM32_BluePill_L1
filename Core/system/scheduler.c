@@ -16,7 +16,7 @@ void Scheduler_AddTask(TaskFunction_t task, uint32_t interval)
     {
         tasks[task_count].Task = task;
         tasks[task_count].interval = interval;
-        tasks[task_count].last_run = 0;
+        tasks[task_count].last_run = HAL_GetTick();
         task_count++;
     }
 }

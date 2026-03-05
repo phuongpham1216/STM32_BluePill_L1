@@ -65,9 +65,8 @@ static void PWM_ApplyFrequencyAndDuty(void)
 
 void PWM_Init(void)
 {
+    /* Chi nap cau hinh, KHONG start xung luc khoi dong. */
     PWM_ApplyFrequencyAndDuty();
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
 }
 
 void PWM_SetDuty(uint16_t duty_percent)

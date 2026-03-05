@@ -11,7 +11,7 @@
 
 /*
  * EC11 thuong cho 2 hoac 4 count cho moi 1 nac tuy cach doc.
- * Ban dang gap nhay 2, nen mac dinh chia theo 2 count/step.
+ * Cau hinh hien tai dung 4 count/step de 1 nac ~ 1 buoc logic.
  */
 #define ENCODER_COUNTS_PER_STEP 4
 
@@ -38,7 +38,7 @@ void Encoder_Task(void)
 
     accum_delta += raw_delta;
 
-    /* Chuan hoa ve don vi "step" de moi nac chi doi 1 lan. */
+    /* Chuan hoa ve don vi step de moi nac chi doi 1 lan. */
     int16_t step = accum_delta / ENCODER_COUNTS_PER_STEP;
     accum_delta = accum_delta % ENCODER_COUNTS_PER_STEP;
 
@@ -52,13 +52,6 @@ void Encoder_Task(void)
 
         case MODE_DUTY:
             App_AdjustDuty(step);
-            break;
-
-        case MODE_RUN:
-            if (step > 0)
-                App_SetRun(1);
-            else
-                App_SetRun(0);
             break;
 
         default:

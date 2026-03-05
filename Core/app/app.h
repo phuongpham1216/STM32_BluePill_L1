@@ -13,7 +13,7 @@
 typedef enum {
     MODE_FREQUENCY = 0,
     MODE_DUTY,
-    MODE_RUN
+    MODE_COUNT
 } AppMode_t;
 
 typedef struct {

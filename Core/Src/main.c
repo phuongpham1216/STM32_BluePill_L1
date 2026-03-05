@@ -54,8 +54,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t pwm_freq = 1000;
-uint32_t pwm_duty = 50;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -103,7 +101,7 @@ int main(void)
   MX_TIM2_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-//  PWM_Init();
+  PWM_Init();
   Encoder_Init();
   Scheduler_Init();
   Button_Init();

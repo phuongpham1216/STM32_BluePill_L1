@@ -11,7 +11,7 @@
 #include "main.h"
 
 void Encoder_Init(void);
-int16_t Encoder_GetDelta(void);
+int16_t Encoder_GetPosition(void);
 
 #endif
 /* DRIVERS_ENCODER_DRIVER_H_ */

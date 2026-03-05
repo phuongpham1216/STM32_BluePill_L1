@@ -5,22 +5,23 @@
  *      Author: P2Lap
  */
 
-#include "main.h"
 #include "debug_module.h"
-#include "stdio.h"
-#include <stdint.h>
-
-extern UART_HandleTypeDef huart1;
-
-int __io_putchar(int ch)
-{
-    HAL_UART_Transmit(&huart1,(uint8_t*)&ch,1,100);
-    return ch;
-}
+#include "app.h"
+#include "log.h"
+#include "main.h"
 
 void Debug_Task(void)
 {
-    static uint32_t counter = 0;
-    printf("System Alive %lu\r\n", (unsigned long)counter++);
-}
+    static uint32_t last_tick = 0;
 
+    if(HAL_GetTick() - last_tick < 500)
+        return;
+
+    last_tick = HAL_GetTick();
+
+    LOG("Mode: %d | Freq: %lu Hz | Duty: %u %% | Run: %d",
+        app.mode,
+        app.freq,
+        app.duty,
+        app.pwm_running);
+}

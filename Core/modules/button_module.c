@@ -10,20 +10,26 @@
 #include "button_driver.h"
 #include "app.h"
 
-#define DEBOUNCE_MS 200
+#define BUTTON_DEBOUNCE_MS 50
 
 void Button_Task(void)
 {
+    static uint8_t last_state = 0;
     static uint32_t last_tick = 0;
 
-    if(Button_GetState())
+    uint8_t current = Button_GetState();
+
+    if(current && !last_state)
     {
-        if(HAL_GetTick() - last_tick > DEBOUNCE_MS)
+        if(HAL_GetTick() - last_tick > BUTTON_DEBOUNCE_MS)
         {
             last_tick = HAL_GetTick();
 
             app.mode++;
-            if(app.mode > MODE_RUN) app.mode = MODE_FREQUENCY;
+            if(app.mode > MODE_RUN)
+                app.mode = MODE_FREQUENCY;
         }
     }
+
+    last_state = current;
 }

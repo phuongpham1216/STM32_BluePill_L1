@@ -25,4 +25,8 @@ typedef struct {
 
 extern App_t app;
 
+void App_AdjustFrequency(int32_t delta);
+void App_AdjustDuty(int32_t delta);
+void App_SetRun(uint8_t state);
+
 #endif/* APP_APP_H_ */

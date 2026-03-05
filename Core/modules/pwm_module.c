@@ -8,24 +8,10 @@
 
 #include "pwm_module.h"
 #include "pwm_driver.h"
+#include "app.h"
 
-static uint16_t duty = 50;
-
-void PWM_Task(void)
+void PWM_ApplyConfig(void)
 {
-    // Tạm thời test: thay đổi duty mỗi 1 giây
-    static uint8_t toggle = 0;
-
-    if(toggle == 0)
-    {
-        duty = 30;
-        toggle = 1;
-    }
-    else
-    {
-        duty = 70;
-        toggle = 0;
-    }
-
-    PWM_SetDuty(duty);
+    PWM_SetFrequency(app.freq);
+    PWM_SetDuty(app.duty);
 }

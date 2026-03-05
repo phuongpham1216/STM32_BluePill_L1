@@ -12,11 +12,11 @@ void Scheduler_Init(void)
 
 void Scheduler_AddTask(TaskFunction_t task, uint32_t interval)
 {
-    if(task_count < MAX_TASKS)
+    if ((task_count < MAX_TASKS) && (task != NULL) && (interval > 0u))
     {
         tasks[task_count].Task = task;
         tasks[task_count].interval = interval;
-        tasks[task_count].last_run = 0;
+        tasks[task_count].last_run = HAL_GetTick();
         task_count++;
     }
 }
@@ -25,11 +25,19 @@ void Scheduler_Run(void)
 {
     uint32_t now = HAL_GetTick();
 
-    for(uint8_t i = 0; i < task_count; i++)
+    for (uint8_t i = 0; i < task_count; i++)
     {
-        if(now - tasks[i].last_run >= tasks[i].interval)
+        if (now - tasks[i].last_run >= tasks[i].interval)
         {
-            tasks[i].last_run = now;
+            /*
+             * Cap nhat last_run theo boi so interval (khong gan = now)
+             * de giam hien tuong troi chu ky khi task chay cham/dao dong.
+             */
+            do
+            {
+                tasks[i].last_run += tasks[i].interval;
+            } while (now - tasks[i].last_run >= tasks[i].interval);
+
             tasks[i].Task();
         }
     }

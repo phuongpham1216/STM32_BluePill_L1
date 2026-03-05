@@ -18,12 +18,14 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 #include "scheduler.h"
 #include "debug_module.h"
 #include "pwm_driver.h"
@@ -99,13 +101,18 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-  PWM_Init();
+//  PWM_Init();
   Encoder_Init();
   Scheduler_Init();
   Button_Init();
   Scheduler_AddTask(Button_Task, 50);
   Scheduler_AddTask(Encoder_Task, 10);
+  Scheduler_AddTask(Debug_Task, 50);
+
+//  printf("Hello\r\n");
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -161,7 +168,11 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+int __io_putchar(int ch)
+{
+    HAL_UART_Transmit(&huart1, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
 /* USER CODE END 4 */
 
 /**

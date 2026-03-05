@@ -5,39 +5,63 @@
  *      Author: P2Lap
  */
 
-#include "main.h"
-#include <stdio.h>
 #include "encoder_module.h"
 #include "encoder_driver.h"
-#include "pwm_driver.h"
 #include "app.h"
 
-static int16_t last_position = 0;
-extern TIM_HandleTypeDef htim1;
+/*
+ * EC11 thuong cho 2 hoac 4 count cho moi 1 nac tuy cach doc.
+ * Ban dang gap nhay 2, nen mac dinh chia theo 2 count/step.
+ */
+#define ENCODER_COUNTS_PER_STEP 4
+
+static uint16_t last_count = 0u;
+static uint8_t initialized = 0u;
+static int16_t accum_delta = 0;
 
 void Encoder_Task(void)
 {
-	int16_t now = Encoder_GetPosition();
-	int16_t delta = now - last_position;
-	last_position = now;
+    uint16_t now_count = (uint16_t)Encoder_GetPosition();
 
-	if(delta == 0) return;
+    if (!initialized)
+    {
+        last_count = now_count;
+        initialized = 1u;
+        return;
+    }
 
-	switch(app.mode)
-	{
-	    case MODE_FREQUENCY:
-	        App_AdjustFrequency(delta);
-	        break;
+    /* Wrap-safe cho counter 16-bit. */
+    int16_t raw_delta = (int16_t)(now_count - last_count);
+    last_count = now_count;
 
-	    case MODE_DUTY:
-	        App_AdjustDuty(delta);
-	        break;
+    if (raw_delta == 0) return;
 
-	    case MODE_RUN:
-	        if(delta > 0)
-	            App_SetRun(1);
-	        else
-	            App_SetRun(0);
-	        break;
-	}
+    accum_delta += raw_delta;
+
+    /* Chuan hoa ve don vi "step" de moi nac chi doi 1 lan. */
+    int16_t step = accum_delta / ENCODER_COUNTS_PER_STEP;
+    accum_delta = accum_delta % ENCODER_COUNTS_PER_STEP;
+
+    if (step == 0) return;
+
+    switch (app.mode)
+    {
+        case MODE_FREQUENCY:
+            App_AdjustFrequency(step);
+            break;
+
+        case MODE_DUTY:
+            App_AdjustDuty(step);
+            break;
+
+        case MODE_RUN:
+            if (step > 0)
+                App_SetRun(1);
+            else
+                App_SetRun(0);
+            break;
+
+        default:
+            break;
+    }
 }

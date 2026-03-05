@@ -43,6 +43,8 @@ void App_SetRun(uint8_t state)
 {
     if(state)
     {
+    	PWM_SetFrequency(app.freq);
+    	PWM_SetDuty(app.duty);
         PWM_Start();
         app.pwm_running = 1;
     }

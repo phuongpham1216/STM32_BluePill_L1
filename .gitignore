@@ -1,7 +1,33 @@
+# STM32CubeIDE build directories
 Debug/
 Release/
+**/Debug/
+**/Release/
+
+# IDE generated settings (machine-specific)
 .settings/
+.metadata/
+
+# Launch/log/temp files
 *.launch
 *.log
+*.tmp
+
+# Build artifacts
+*.o
+*.d
+*.su
+*.elf
+*.map
+*.list
+*.hex
+*.bin
+
+# OS / editor noise
 Thumbs.db
 .DS_Store
+.vscode/
+.idea/
+
+# Local vendor clone (temporary)
+third_party/

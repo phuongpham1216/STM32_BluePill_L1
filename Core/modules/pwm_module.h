@@ -8,7 +8,7 @@
 #ifndef PWM_MODULE_H
 #define PWM_MODULE_H
 
-void PWM_Task(void);
+void PWM_ApplyConfig(void);
 
 #endif
 /* MODULES_PWM_MODULE_H_ */

@@ -1,0 +1,22 @@
+* text=auto
+
+# Source code
+*.c text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.s text eol=lf
+*.S text eol=lf
+*.ld text eol=lf
+
+# Build/config files commonly used in STM32 projects
+Makefile text eol=lf
+*.mk text eol=lf
+*.cmake text eol=lf
+*.ioc text eol=lf
+*.project text eol=lf
+*.cproject text eol=lf
+
+# Windows scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf

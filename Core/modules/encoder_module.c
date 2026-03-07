@@ -5,69 +5,56 @@
  *      Author: P2Lap
  */
 
-#include "main.h"
-#include <stdio.h>
 #include "encoder_module.h"
 #include "encoder_driver.h"
-#include "pwm_driver.h"
 #include "app.h"
 
-extern TIM_HandleTypeDef htim1;
+/*
+ * EC11 thuong cho 2 hoac 4 count cho moi 1 nac tuy cach doc.
+ * Cau hinh hien tai dung 4 count/step de 1 nac ~ 1 buoc logic.
+ */
+#define ENCODER_COUNTS_PER_STEP 4
+
+static uint16_t last_count = 0u;
+static uint8_t initialized = 0u;
+static int16_t accum_delta = 0;
 
 void Encoder_Task(void)
 {
-    int16_t delta = Encoder_GetDelta();
+    uint16_t now_count = (uint16_t)Encoder_GetPosition();
 
-    if(delta == 0) return;
+    if (!initialized)
+    {
+        last_count = now_count;
+        initialized = 1u;
+        return;
+    }
 
-    switch(app.mode)
+    /* Wrap-safe cho counter 16-bit. */
+    int16_t raw_delta = (int16_t)(now_count - last_count);
+    last_count = now_count;
+
+    if (raw_delta == 0) return;
+
+    accum_delta += raw_delta;
+
+    /* Chuan hoa ve don vi step de moi nac chi doi 1 lan. */
+    int16_t step = accum_delta / ENCODER_COUNTS_PER_STEP;
+    accum_delta = accum_delta % ENCODER_COUNTS_PER_STEP;
+
+    if (step == 0) return;
+
+    switch (app.mode)
     {
         case MODE_FREQUENCY:
-            {
-                app.freq += delta * 100;
-                if(app.freq < 1000)  app.freq = 1000;
-                if(app.freq > 50000) app.freq = 50000;
-
-                PWM_SetFrequency(app.freq);
-                printf("Mode:FREQ -> %lu Hz\r\n", app.freq);
-            }
+            App_AdjustFrequency(step);
             break;
 
         case MODE_DUTY:
-            {
-                int32_t d = app.duty + delta;
-                if(d <   5) d = 5;
-                if(d >  95) d = 95;
-                app.duty = d;
-
-                PWM_SetDuty(app.duty);
-                printf("Mode:DUTY -> %u %%\r\n", app.duty);
-            }
+            App_AdjustDuty(step);
             break;
 
-        case MODE_RUN:
-            {
-                if(delta > 0)
-                {
-                    if(!app.pwm_running)
-                    {
-                        PWM_Init();
-                        app.pwm_running = 1;
-                        printf("PWM START\r\n");
-                    }
-                }
-                else
-                {
-                    if(app.pwm_running)
-                    {
-                        // stop PWM
-                        HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-                        HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-                        app.pwm_running = 0;
-                        printf("PWM STOP\r\n");
-                    }
-                }
-            }
+        default:
             break;
     }
 }

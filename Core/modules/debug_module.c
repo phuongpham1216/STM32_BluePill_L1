@@ -5,22 +5,33 @@
  *      Author: P2Lap
  */
 
-#include "main.h"
 #include "debug_module.h"
-#include "stdio.h"
-#include <stdint.h>
+#include "app.h"
+#include "log.h"
+#include "main.h"
 
-extern UART_HandleTypeDef huart1;
-
-int __io_putchar(int ch)
+static const char* App_ModeToString(AppMode_t mode)
 {
-    HAL_UART_Transmit(&huart1,(uint8_t*)&ch,1,100);
-    return ch;
+    switch (mode)
+    {
+        case MODE_FREQUENCY: return "FREQ";
+        case MODE_DUTY:      return "DUTY";
+        default:             return "UNK";
+    }
 }
 
 void Debug_Task(void)
 {
-    static uint32_t counter = 0;
-    printf("System Alive %lu\r\n", (unsigned long)counter++);
-}
+    static uint32_t last_tick = 0;
 
+    if (HAL_GetTick() - last_tick < 500u)
+        return;
+
+    last_tick = HAL_GetTick();
+
+    LOG("Mode: %s | Freq: %lu Hz | Duty: %u %% | Run: %d",
+        App_ModeToString(app.mode),
+        app.freq,
+        app.duty,
+        app.pwm_running);
+}

@@ -18,12 +18,14 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 #include "scheduler.h"
 #include "debug_module.h"
 #include "pwm_driver.h"
@@ -32,6 +34,7 @@
 #include "encoder_module.h"
 #include "button_driver.h"
 #include "button_module.h"
+#include "display_module.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,8 +55,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t pwm_freq = 1000;
-uint32_t pwm_duty = 50;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -99,6 +100,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   PWM_Init();
   Encoder_Init();
@@ -106,6 +108,12 @@ int main(void)
   Button_Init();
   Scheduler_AddTask(Button_Task, 50);
   Scheduler_AddTask(Encoder_Task, 10);
+  Scheduler_AddTask(Debug_Task, 50);
+  Display_Init();
+  Scheduler_AddTask(Display_Task, 100);
+
+//  printf("Hello\r\n");
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -161,7 +169,11 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+int __io_putchar(int ch)
+{
+    HAL_UART_Transmit(&huart1, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
 /* USER CODE END 4 */
 
 /**
@@ -194,3 +206,5 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
+

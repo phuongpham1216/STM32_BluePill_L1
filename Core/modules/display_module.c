@@ -19,8 +19,10 @@ void Display_Task(void)
     static uint16_t last_duty = 0u;
     static uint8_t last_run = 2u;
 
-    char line1[17];
-    char line2[17];
+    char line1[22];
+    char line2[22];
+    char line3[22];
+    char line4[22];
 
     if (!first &&
         (last_mode == app.mode) &&
@@ -31,18 +33,20 @@ void Display_Task(void)
         return;
     }
 
-    (void)snprintf(line1, sizeof(line1), "F:%5luHz R:%s",
-                   app.freq,
-                   app.pwm_running ? "ON " : "OFF");
-
-    (void)snprintf(line2, sizeof(line2), "D:%2u%% M:%s",
-                   app.duty,
+    (void)snprintf(line1, sizeof(line1), "Freq: %lu Hz", app.freq);
+    (void)snprintf(line2, sizeof(line2), "Duty: %u %%", app.duty);
+    (void)snprintf(line3, sizeof(line3), "Mode: %s",
                    (app.mode == MODE_FREQUENCY) ? "FREQ" : "DUTY");
+    (void)snprintf(line4, sizeof(line4), "PWM : %s", app.pwm_running ? "ON" : "OFF");
 
     ST7920_SetCursor(0u, 0u);
     ST7920_WriteString(line1);
     ST7920_SetCursor(1u, 0u);
     ST7920_WriteString(line2);
+    ST7920_SetCursor(2u, 0u);
+    ST7920_WriteString(line3);
+    ST7920_SetCursor(3u, 0u);
+    ST7920_WriteString(line4);
 
     last_mode = app.mode;
     last_freq = app.freq;

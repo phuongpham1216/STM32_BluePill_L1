@@ -28,13 +28,16 @@
 #include "../../third_party/csrc/u8g2_bitmap.c"
 #include "../../third_party/csrc/u8g2_intersection.c"
 
-#define ST7920_CS_PORT GPIOB
-#define ST7920_CS_PIN  GPIO_PIN_12
+#define ST7920_CS_PORT   GPIOB
+#define ST7920_CS_PIN    GPIO_PIN_12
+#define ST7920_TEXT_ROWS 4u
+/* Font 6x12 tren man 128px ngang: 128/6 ~= 21 ky tu */
+#define ST7920_TEXT_COLS 21u
 
 static u8g2_t g_u8g2;
 static uint8_t g_cursor_row = 0u;
 static uint8_t g_cursor_col = 0u;
-static char g_lines[4][17];
+static char g_lines[ST7920_TEXT_ROWS][ST7920_TEXT_COLS + 1u];
 
 static void ST7920_WriteCS(uint8_t active)
 {
@@ -52,7 +55,7 @@ uint8_t u8x8_gpio_and_delay(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *ar
     (void)u8x8;
     (void)arg_ptr;
 
-    switch(msg)
+    switch (msg)
     {
         case U8X8_MSG_GPIO_AND_DELAY_INIT:
             __HAL_RCC_GPIOB_CLK_ENABLE();
@@ -95,7 +98,7 @@ uint8_t u8x8_spi(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
 {
     (void)u8x8;
 
-    switch(msg)
+    switch (msg)
     {
         case U8X8_MSG_BYTE_SET_DC:
             /* ST7920 serial khong can DC. */
@@ -140,10 +143,10 @@ void ST7920_Init(void)
 {
     uint8_t i;
 
-    for (i = 0u; i < 4u; i++)
+    for (i = 0u; i < ST7920_TEXT_ROWS; i++)
     {
-        memset(g_lines[i], ' ', 16u);
-        g_lines[i][16] = '\0';
+        memset(g_lines[i], ' ', ST7920_TEXT_COLS);
+        g_lines[i][ST7920_TEXT_COLS] = '\0';
     }
 
     u8g2_Setup_st7920_s_128x64_f(&g_u8g2, U8G2_R0, u8x8_spi, u8x8_gpio_and_delay);
@@ -160,18 +163,18 @@ void ST7920_Init(void)
 void ST7920_Clear(void)
 {
     uint8_t i;
-    for (i = 0u; i < 4u; i++)
+    for (i = 0u; i < ST7920_TEXT_ROWS; i++)
     {
-        memset(g_lines[i], ' ', 16u);
-        g_lines[i][16] = '\0';
+        memset(g_lines[i], ' ', ST7920_TEXT_COLS);
+        g_lines[i][ST7920_TEXT_COLS] = '\0';
     }
     ST7920_RenderAll();
 }
 
 void ST7920_SetCursor(uint8_t row, uint8_t col)
 {
-    if (row > 3u) row = 0u;
-    if (col > 15u) col = 15u;
+    if (row >= ST7920_TEXT_ROWS) row = 0u;
+    if (col >= ST7920_TEXT_COLS) col = (uint8_t)(ST7920_TEXT_COLS - 1u);
 
     g_cursor_row = row;
     g_cursor_col = col;
@@ -183,11 +186,20 @@ void ST7920_WriteString(const char* str)
 
     if (str == NULL) return;
 
-    memset(g_lines[g_cursor_row], ' ', 16u);
+    /* Neu ghi tu cot 0, xoa sach dong de tranh sot ky tu cu. */
+    if (g_cursor_col == 0u)
+    {
+        memset(g_lines[g_cursor_row], ' ', ST7920_TEXT_COLS);
+    }
+
     len = (uint8_t)strlen(str);
-    if (len > (uint8_t)(16u - g_cursor_col)) len = (uint8_t)(16u - g_cursor_col);
+    if (len > (uint8_t)(ST7920_TEXT_COLS - g_cursor_col))
+    {
+        len = (uint8_t)(ST7920_TEXT_COLS - g_cursor_col);
+    }
+
     memcpy(&g_lines[g_cursor_row][g_cursor_col], str, len);
-    g_lines[g_cursor_row][16] = '\0';
+    g_lines[g_cursor_row][ST7920_TEXT_COLS] = '\0';
 
     ST7920_RenderAll();
 }

@@ -28,3 +28,6 @@ Thumbs.db
 .DS_Store
 .vscode/
 .idea/
+
+# Local vendor clone (temporary)
+third_party/

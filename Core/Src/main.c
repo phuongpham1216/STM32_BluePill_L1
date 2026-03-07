@@ -34,6 +34,7 @@
 #include "encoder_module.h"
 #include "button_driver.h"
 #include "button_module.h"
+#include "display_module.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,6 +109,8 @@ int main(void)
   Scheduler_AddTask(Button_Task, 50);
   Scheduler_AddTask(Encoder_Task, 10);
   Scheduler_AddTask(Debug_Task, 50);
+  Display_Init();
+  Scheduler_AddTask(Display_Task, 100);
 
 //  printf("Hello\r\n");
 
@@ -203,3 +206,5 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
+

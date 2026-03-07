@@ -75,3 +75,15 @@ void App_ResetToDefault(uint8_t force_pwm_off)
         App_SetRun(was_running ? 1u : 0u);
     }
 }
+
+void App_ResetToDefaultByPolicy(void)
+{
+#if (APP_LONGPRESS_RESET_POLICY == APP_RESET_BOOT_DEFAULT)
+    App_ResetToDefault(1u);
+#elif (APP_LONGPRESS_RESET_POLICY == APP_RESET_KEEP_RUN)
+    App_ResetToDefault(0u);
+#else
+    /* Fallback an toan neu config sai: ve boot default. */
+    App_ResetToDefault(1u);
+#endif
+}

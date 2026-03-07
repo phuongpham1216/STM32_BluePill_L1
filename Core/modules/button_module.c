@@ -10,9 +10,8 @@
 #include "app.h"
 
 /* Cac tham so co the chinh theo yeu cau bai toan. */
-#define BUTTON_DEBOUNCE_MS          50u
-#define MODE_LONG_PRESS_MS          3000u
-#define MODE_LONG_PRESS_FORCE_OFF   0u
+#define BUTTON_DEBOUNCE_MS  50u
+#define MODE_LONG_PRESS_MS  3000u
 
 void Button_Task(void)
 {
@@ -40,7 +39,7 @@ void Button_Task(void)
         /* Dang giu: neu qua nguong thi reset default 1 lan. */
         if (!mode_long_handled && (now - mode_press_tick >= MODE_LONG_PRESS_MS))
         {
-            App_ResetToDefault(MODE_LONG_PRESS_FORCE_OFF);
+            App_ResetToDefaultByPolicy();
             mode_long_handled = 1u;
         }
     }

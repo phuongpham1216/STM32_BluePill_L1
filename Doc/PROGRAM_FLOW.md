@@ -59,6 +59,10 @@ He thong co 2 mode:
 
 Nut `PA3` dung de toggle RUN/STOP PWM.
 
+Nut `PA2` ho tro 2 kieu thao tac:
+- Bấm ngan: doi mode `FREQ <-> DUTY`.
+- Bấm giu (long-press): reset ve default theo policy duoc cau hinh khi build/flash.
+
 ## 4. Flow chart tong the
 
 ```text
@@ -104,12 +108,18 @@ Nut `PA3` dung de toggle RUN/STOP PWM.
 ### 5.1 Button_Task (chu ky 50 ms)
 
 ```text
-Doc PA2, PA3 -> detect canh nhan + debounce
+Doc PA2, PA3
   |
-  +-- PA2 nhan hop le -> doi mode FREQ <-> DUTY
+  +-- PA2 (MODE)
+  |     +-- Nhan xuong: luu thoi diem bat dau nhan
+  |     +-- Dang giu >= MODE_LONG_PRESS_MS:
+  |     |      App_ResetToDefaultByPolicy() (chi 1 lan)
+  |     +-- Nha ra truoc nguong long-press:
+  |            short-press => doi mode FREQ <-> DUTY
   |
-  +-- PA3 nhan hop le -> App_SetRun(!app.pwm_running)
-                          -> PWM_Start hoac PWM_Stop
+  +-- PA3 (RUN)
+        +-- Nhan hop le + debounce
+              App_SetRun(!app.pwm_running)
 ```
 
 ### 5.2 Encoder_Task (chu ky 10 ms)
@@ -164,11 +174,16 @@ app.* ------------> Debug_Task --------> UART log
 
 - `Core/app/app.h`
   - Khai bao `AppMode_t`, `App_t`, bien global `app`.
-  - API muc ung dung: `App_AdjustFrequency`, `App_AdjustDuty`, `App_SetRun`.
+  - Khai bao default (`APP_DEFAULT_FREQ`, `APP_DEFAULT_DUTY`, ...).
+  - Khai bao policy long-press:
+    - `APP_RESET_BOOT_DEFAULT`
+    - `APP_RESET_KEEP_RUN`
+    - `APP_LONGPRESS_RESET_POLICY`
 - `Core/app/app.c`
   - Chua state trung tam cua he thong (`app`).
   - Ap gioi han freq/duty.
   - Dieu khien start/stop PWM qua driver.
+  - `App_ResetToDefaultByPolicy()` xu ly reset theo policy compile-time.
 
 ## 7.2 Nhom system
 
@@ -185,7 +200,7 @@ app.* ------------> Debug_Task --------> UART log
 - `Core/modules/button_module.h/.c`
   - Poll 2 nut PA2/PA3.
   - Debounce bang `HAL_GetTick`.
-  - Chuyen mode va toggle run/stop.
+  - Ho tro short-press va long-press cho nut MODE.
 - `Core/modules/encoder_module.h/.c`
   - Doc delta encoder tu driver.
   - Chuan hoa buoc EC11 (4 count/step) de tranh nhay 2 so.
@@ -257,6 +272,9 @@ app.* ------------> Debug_Task --------> UART log
 - Duty clamp: `5..95` %.
 - Encoder step logic: 1 nac ~ 1 buoc (sau chuan hoa 4 count/step).
 - Display update theo thay doi state, khong refresh lien tuc vo ich.
+- Long-press MODE:
+  - Nguong thoi gian: `MODE_LONG_PRESS_MS`.
+  - Policy reset: `APP_LONGPRESS_RESET_POLICY`.
 
 ## 10. Huong dan doc code theo thu tu de hoc nhanh
 
@@ -266,3 +284,30 @@ app.* ------------> Debug_Task --------> UART log
 4. Doc `Core/drivers/pwm_driver.c` de hieu tinh toan timer.
 5. Doc `Core/modules/display_module.c` + `Core/drivers/st7920_driver.c`.
 6. Cuoi cung doc `Core/system/scheduler.c` de hieu nen chay task.
+
+## 11. Nhung diem can chu y de hoc sau
+
+- Kien truc scheduler cooperative:
+  - Uu/nhuoc diem so voi RTOS.
+  - Cach tranh block CPU trong task.
+- Debounce va long-press chuan:
+  - Cach tach state machine nut bam ro rang hon.
+  - Xu ly bounce trong truong hop nhieu dien.
+- Encoder EC11:
+  - So sanh poll bang TIM encoder voi ngat EXTI.
+  - Thuat toan loc jitter / anti-noise.
+- PWM nang cao:
+  - Complementary output, dead-time, break input (TIM1 advanced).
+  - Anh huong PSC/ARR den do phan giai duty.
+- Display ST7920 + U8g2:
+  - Full-buffer vs page-buffer (RAM, toc do).
+  - Toi uu chi redraw vung thay doi.
+- Kiem thu he thong nhung:
+  - Viet test logic thuần C cho `app`/`button`/`encoder`.
+  - Tao checklist test hardware co log mong doi.
+- Quan ly cau hinh build:
+  - Tach config vao file `app_config.h` (thoi gian long-press, reset policy).
+  - Dung `#error` de chan cau hinh sai gia tri.
+- Quy trinh debug:
+  - Ket hop UART log + oscilloscope de doi chieu logic va tin hieu that.
+  - Ghi lai symptom + timestamp de khoanh vung nhanh hon.
